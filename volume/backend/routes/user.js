@@ -1,14 +1,13 @@
 const express = require("express");
-
 const router = express.Router();
 const logger = require("../lib/logger");
 const userService = require("../service/userService");
+const dotenv = require("dotenv");
 
 // 등록 (회원가입)
 router.post("/", async (req, res) => {
   try {
     const params = {
-      // departmentId: req.body.departmentId,
       name: req.body.name,
       userid: req.body.userid,
       password: req.body.password,
@@ -24,6 +23,14 @@ router.post("/", async (req, res) => {
       logger.error(err.toString());
 
       res.status(500).json({ err: err.toString() });
+    }
+
+    // root계정에 대한 권한 처리
+    if (
+      params.userid === process.env.ROOT_ID &&
+      params.password === process.env.ROOT_PASS
+    ) {
+      params.role = "관리자";
     }
 
     // 비즈니스 로직 호출
