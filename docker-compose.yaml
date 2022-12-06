@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  server-last-project:
+    build:
+      context: .
+    image: node:14
+    volumes:
+      - "./volume/backend:/home/server"
+    command: ["/bin/bash"]
+    ports:
+      - "8002:8000"
+    tty: true
+    stdin_open: true
+    networks:
+      - webnet
+  # mqtt:
+  #   image: eclipse-mosquitto
+  #   hostname: mosquitto
+  #   restart: always
+  #   ports:
+  #     - "1834:1883"
+  #     - "8089:8088"
+  #   volumes:
+  #     - ./mqtt/config:/mosquitto/config
+  #   tty: true
+  #   stdin_open: true
+  #   networks:
+  #     - webnet
+networks:
+  webnet:
