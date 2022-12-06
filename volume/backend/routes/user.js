@@ -31,6 +31,8 @@ router.post("/", async (req, res) => {
       params.password === process.env.ROOT_PASS
     ) {
       params.role = "관리자";
+    } else if (params.role === "관리자") {
+      params.role = "직원";
     }
 
     // 비즈니스 로직 호출
