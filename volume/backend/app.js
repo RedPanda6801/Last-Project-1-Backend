@@ -4,7 +4,6 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const corsConfig = require("./config/corsConfig.json");
 const models = require("./models/index");
 const logger = require("./lib/logger");
 
@@ -37,7 +36,11 @@ models.sequelize
   });
 
 // app.use(logger('dev')); // 구코드 삭제
-app.use(cors(corsConfig));
+app.use(
+  cors({
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -46,7 +49,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use("/", indexRouter);
-// app.use('/users', usersRouter); // 구코드 삭제
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

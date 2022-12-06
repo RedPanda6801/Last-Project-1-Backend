@@ -1,6 +1,6 @@
-const logger = require('../lib/logger');
-const hashUtil = require('../lib/hashUtil');
-const userDao = require('../dao/userDao');
+const logger = require("../lib/logger");
+const hashUtil = require("../lib/hashUtil");
+const userDao = require("../dao/userDao");
 
 const service = {
   // user 입력
@@ -11,7 +11,9 @@ const service = {
     let hashPassword = null;
     try {
       hashPassword = await hashUtil.makePasswordHash(params.password);
-      logger.debug(`(userService.makePassword) ${JSON.stringify(params.password)}`);
+      logger.debug(
+        `(userService.makePassword) ${JSON.stringify(params.password)}`
+      );
     } catch (err) {
       logger.error(`(userService.makePassword) ${err.toString()}`);
       return new Promise((resolve, reject) => {
@@ -122,7 +124,7 @@ const service = {
 
       // 해당 사용자가 없는 경우 튕겨냄
       if (!user) {
-        const err = new Error('Incorect userid or password');
+        const err = new Error("Incorrect userid or password");
         logger.error(err.toString());
 
         return new Promise((resolve, reject) => {
@@ -138,12 +140,15 @@ const service = {
 
     // 2. 비밀번호 비교
     try {
-      const checkPassword = await hashUtil.checkPasswordHash(params.password, user.password);
+      const checkPassword = await hashUtil.checkPasswordHash(
+        params.password,
+        user.password
+      );
       logger.debug(`(userService.checkPassword) ${checkPassword}`);
 
       // 비밀번호 틀린 경우 튕겨냄
       if (!checkPassword) {
-        const err = new Error('Incorect userid or password');
+        const err = new Error("Incorect userid or password");
         logger.error(err.toString());
 
         return new Promise((resolve, reject) => {

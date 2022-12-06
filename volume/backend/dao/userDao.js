@@ -1,19 +1,33 @@
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
 // const { User, Department } = require('../models/index');
-const { User } = require('../models/index');
+const { User } = require("../models/index");
 
 const dao = {
+  // 단일 조회
+  findUserById(userid) {
+    return new Promise((resolve, reject) =>
+      User.findOne({ where: { userid } })
+        .then((user) => {
+          resolve(user);
+        })
+        .catch((err) => {
+          reject(err);
+        })
+    );
+  },
   // 등록
   insert(params) {
     return new Promise((resolve, reject) => {
-      User.create(params).then((inserted) => {
-        // password는 제외하고 리턴함
-        const insertedResult = { ...inserted };
-        delete insertedResult.dataValues.password;
-        resolve(inserted);
-      }).catch((err) => {
-        reject(err);
-      });
+      User.create(params)
+        .then((inserted) => {
+          // password는 제외하고 리턴함
+          const insertedResult = { ...inserted };
+          delete insertedResult.dataValues.password;
+          resolve(inserted);
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   },
   // 리스트 조회
@@ -34,53 +48,53 @@ const dao = {
     }
 
     // order by 정렬 조건
-    setQuery.order = [['id', 'DESC']];
+    setQuery.order = [["id", "DESC"]];
 
     return new Promise((resolve, reject) => {
       User.findAndCountAll({
         ...setQuery,
-        attributes: { exclude: ['password'] }, // password 필드 제외
+        attributes: { exclude: ["password"] }, // password 필드 제외
         // include: [
         //   {
         //     model: Department,
         //     as: 'Department',
         //   },
         // ],
-      }).then((selectedList) => {
-        resolve(selectedList);
-      }).catch((err) => {
-        reject(err);
-      });
+      })
+        .then((selectedList) => {
+          resolve(selectedList);
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   },
   // 상세정보 조회
   selectInfo(params) {
     return new Promise((resolve, reject) => {
-      User.findByPk(
-        params.id,
-        {
-          attributes: { exclude: ['password'] }, // password 필드 제외
-        },
-      ).then((selectedInfo) => {
-        resolve(selectedInfo);
-      }).catch((err) => {
-        reject(err);
-      });
+      User.findByPk(params.id, {
+        attributes: { exclude: ["password"] }, // password 필드 제외
+      })
+        .then((selectedInfo) => {
+          resolve(selectedInfo);
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   },
   // 수정
   update(params) {
     return new Promise((resolve, reject) => {
-      User.update(
-        params,
-        {
-          where: { id: params.id },
-        },
-      ).then(([updated]) => {
-        resolve({ updatedCount: updated });
-      }).catch((err) => {
-        reject(err);
-      });
+      User.update(params, {
+        where: { id: params.id },
+      })
+        .then(([updated]) => {
+          resolve({ updatedCount: updated });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   },
   // 삭제
@@ -88,24 +102,28 @@ const dao = {
     return new Promise((resolve, reject) => {
       User.destroy({
         where: { id: params.id },
-      }).then((deleted) => {
-        resolve({ deletedCount: deleted });
-      }).catch((err) => {
-        reject(err);
-      });
+      })
+        .then((deleted) => {
+          resolve({ deletedCount: deleted });
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   },
   // 로그인을 위한 사용자 조회
   selectUser(params) {
     return new Promise((resolve, reject) => {
       User.findOne({
-        attributes: ['id', 'userid', 'password', 'name', 'role'],
+        attributes: ["id", "userid", "password", "name", "role"],
         where: { userid: params.userid },
-      }).then((selectedOne) => {
-        resolve(selectedOne);
-      }).catch((err) => {
-        reject(err);
-      });
+      })
+        .then((selectedOne) => {
+          resolve(selectedOne);
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   },
 };

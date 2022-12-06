@@ -1,14 +1,11 @@
 const Sequelize = require("sequelize");
 
-module.exports = class Device extends Sequelize.Model {
+module.exports = class LogError extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        name: {
-          type: Sequelize.STRING(100),
-        },
-        devNum: {
-          type: Sequelize.INTEGER,
+        content: {
+          type: Sequelize.STRING(500),
           allowNull: false,
         },
       },
@@ -20,9 +17,7 @@ module.exports = class Device extends Sequelize.Model {
       }
     );
   }
-
   static associate(db) {
-    db.Device.hasMany(db.LogError);
-    db.Device.hasMany(db.LogInfo);
+    db.LogError.belongsTo(db.Device);
   }
 };

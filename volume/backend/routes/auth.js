@@ -12,6 +12,7 @@ router.post("/token", async (req, res) => {
       userid: req.body.userid,
       password: req.body.password,
     };
+    console.log("파라미터", params);
     logger.info(`(auth.token.params) ${JSON.stringify(params)}`);
 
     // 입력값 null 체크

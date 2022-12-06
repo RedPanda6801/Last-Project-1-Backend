@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const logger = require("../lib/logger");
 const userService = require("../service/userService");
+const userDao = require("../dao/userDao");
 const dotenv = require("dotenv");
 
 // 등록 (회원가입)
@@ -25,6 +26,12 @@ router.post("/", async (req, res) => {
       res.status(500).json({ err: err.toString() });
     }
 
+    // DB에 중복된 아이디가 있는지 확인
+    if (await userDao.findUserById(params.userid)) {
+      const err = new Error("user id is already existed!");
+      logger.error(err.toString());
+      res.status(500).json({ err: err.toString() });
+    }
     // root계정에 대한 권한 처리
     if (
       params.userid === process.env.ROOT_ID &&

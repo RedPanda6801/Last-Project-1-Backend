@@ -1,15 +1,9 @@
 const Sequelize = require("sequelize");
 
-module.exports = class Log extends Sequelize.Model {
+module.exports = class LogInfo extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        status: {
-          type: Sequelize.STRING(10),
-        },
-        category: {
-          type: Sequelize.ENUM("ERROR", "WORKING", "CONNECTING"),
-        },
         content: {
           type: Sequelize.STRING(500),
           allowNull: false,
@@ -24,6 +18,6 @@ module.exports = class Log extends Sequelize.Model {
     );
   }
   static associate(db) {
-    db.Log.belongsTo(db.Device);
+    db.LogInfo.belongsTo(db.Device);
   }
 };
