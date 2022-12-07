@@ -3,55 +3,48 @@ const { Op } = require("sequelize");
 const { User } = require("../models/index");
 
 const dao = {
-  // 단일 조회
-  findUserById(userid) {
-    return new Promise((resolve, reject) =>
-      User.findOne({ where: { userid } })
-        .then((user) => {
-          resolve(user);
-        })
-        .catch((err) => {
-          reject(err);
-        })
-    );
+  // 유저 아이디 중복 확인
+  async SelectByUserId(userid) {
+    try {
+      const user = await User.findOne({ where: { userid } });
+      return user;
+    } catch (error) {
+      return new Error(error);
+    }
   },
   // 등록
-  insert(params) {
-    return new Promise((resolve, reject) => {
-      User.create(params)
-        .then((inserted) => {
-          // password는 제외하고 리턴함
-          const insertedResult = { ...inserted };
-          delete insertedResult.dataValues.password;
-          resolve(inserted);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+  async insert(params) {
+    try {
+      const insert = await User.create(params);
+      const insertedResult = { ...insert };
+      delete insertedResult.dataValues.password;
+      return insert;
+    } catch (error) {
+      return new Error(error);
+    }
   },
   // 리스트 조회
-  selectList(params) {
-    // where 검색 조건
-    const setQuery = {};
-    if (params.name) {
-      setQuery.where = {
-        ...setQuery.where,
-        name: { [Op.like]: `%${params.name}%` }, // like검색
-      };
-    }
-    if (params.userid) {
-      setQuery.where = {
-        ...setQuery.where,
-        userid: params.userid, // '='검색
-      };
-    }
+  async selectList(params) {
+    try {
+      // where 검색 조건
+      const setQuery = {};
+      if (params.name) {
+        setQuery.where = {
+          ...setQuery.where,
+          name: { [Op.like]: `%${params.name}%` }, // like검색
+        };
+      }
+      if (params.userid) {
+        setQuery.where = {
+          ...setQuery.where,
+          userid: params.userid, // '='검색
+        };
+      }
 
-    // order by 정렬 조건
-    setQuery.order = [["id", "DESC"]];
+      // order by 정렬 조건
+      setQuery.order = [["id", "DESC"]];
 
-    return new Promise((resolve, reject) => {
-      User.findAndCountAll({
+      const findAll = await User.findAndCountAll({
         ...setQuery,
         attributes: { exclude: ["password"] }, // password 필드 제외
         // include: [
@@ -60,56 +53,53 @@ const dao = {
         //     as: 'Department',
         //   },
         // ],
-      })
-        .then((selectedList) => {
-          resolve(selectedList);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+      });
+      return findAll;
+    } catch (error) {
+      return new Error(error);
+    }
   },
   // 상세정보 조회
-  selectInfo(params) {
-    return new Promise((resolve, reject) => {
-      User.findByPk(params.id, {
+  async selectInfo(id) {
+    try {
+      const userinfo = await User.findByPk(id, {
         attributes: { exclude: ["password"] }, // password 필드 제외
-      })
-        .then((selectedInfo) => {
-          resolve(selectedInfo);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+      });
+      return userinfo;
+    } catch (error) {
+      return new Error(error);
+    }
   },
   // 수정
-  update(params) {
-    return new Promise((resolve, reject) => {
-      User.update(params, {
-        where: { id: params.id },
-      })
-        .then(([updated]) => {
-          resolve({ updatedCount: updated });
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+  async update(lastInfo, params) {
+    try {
+      console.log("파라미터 뭐지: ", params);
+      const updated = await User.update(
+        {
+          name: params.name ? params.name : lastInfo.name,
+          role: params.role ? params.role : lastInfo.role,
+          email: params.email ? params.email : lastInfo.email,
+          phone: params.phone ? params.phone : lastInfo.phone,
+        },
+        {
+          where: { id: params.id },
+        }
+      );
+      return updated;
+    } catch (error) {
+      return new Error(error);
+    }
   },
   // 삭제
-  delete(params) {
-    return new Promise((resolve, reject) => {
-      User.destroy({
+  async delete(params) {
+    try {
+      const deleted = await User.destroy({
         where: { id: params.id },
-      })
-        .then((deleted) => {
-          resolve({ deletedCount: deleted });
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+      });
+      return deleted;
+    } catch (error) {
+      return new Error(error);
+    }
   },
   // 로그인을 위한 사용자 조회
   selectUser(params) {
