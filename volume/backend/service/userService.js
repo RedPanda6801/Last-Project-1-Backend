@@ -14,11 +14,9 @@ const service = {
       logger.debug(
         `(userService.makePassword) ${JSON.stringify(params.password)}`
       );
-    } catch (err) {
+    } catch (error) {
       logger.error(`(userService.makePassword) ${err.toString()}`);
-      return new Promise((resolve, reject) => {
-        reject(err);
-      });
+      return new Error(error);
     }
 
     // 2. 사용자 등록 처리
@@ -26,31 +24,26 @@ const service = {
       ...params,
       password: hashPassword,
     };
-
     try {
       inserted = await userDao.insert(newParams);
-      logger.debug(`(userService.reg) ${JSON.stringify(inserted)}`);
+      logger.debug(`(userDao.insert) ${JSON.stringify(inserted)}`);
     } catch (err) {
-      logger.error(`(userService.reg) ${err.toString()}`);
-      return new Promise((resolve, reject) => {
-        reject(err);
-      });
+      logger.error(`(userDao.insert) ${err.toString()}`);
+      return new Error(error);
     }
-
     // 결과값 리턴
-    return new Promise((resolve) => {
-      resolve(inserted);
-    });
+    return inserted;
   },
+
   // selectList
   async list(params) {
     let result = null;
 
     try {
       result = await userDao.selectList(params);
-      logger.debug(`(userService.list) ${JSON.stringify(result)}`);
+      logger.debug(`(userDao.selectList) ${JSON.stringify(result)}`);
     } catch (err) {
-      logger.error(`(userService.list) ${err.toString()}`);
+      logger.error(`(userDao.selectList) ${err.toString()}`);
       return new Promise((resolve, reject) => {
         reject(err);
       });
@@ -66,9 +59,9 @@ const service = {
 
     try {
       result = await userDao.selectInfo(params);
-      logger.debug(`(userService.info) ${JSON.stringify(result)}`);
+      logger.debug(`(userDao.info) ${JSON.stringify(result)}`);
     } catch (err) {
-      logger.error(`(userService.info) ${err.toString()}`);
+      logger.error(`(userDao.info) ${err.toString()}`);
       return new Promise((resolve, reject) => {
         reject(err);
       });
