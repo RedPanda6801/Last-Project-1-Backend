@@ -41,6 +41,13 @@ exports.userUpdate = async (req, res) => {
     logger.error(Error.toString());
     return res.status(500).json(error.toString());
   }
+  // 역할을 관리자 권한으로 변경하려고 하는 경우의 예외처리
+  if (params.role === "관리자") {
+    const error = new Error("(userUpdate)Unauthorized Error");
+    logger.error(error.toString());
+    return res.status(500).json({ error: error.toString() });
+  }
+
   // 바뀌기 전의 정보를 조회
   try {
     lastInfo = await userDao.selectInfo(params.id);
