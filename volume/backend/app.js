@@ -4,12 +4,16 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+
+const { mqttConnect } = require("./lib/mqttConnect");
 const models = require("./models/index");
 const logger = require("./lib/logger");
-
 const indexRouter = require("./routes/index");
 
 const app = express();
+
+// MQTT 연결
+// mqttConnect();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
