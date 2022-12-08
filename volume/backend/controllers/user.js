@@ -97,3 +97,11 @@ exports.userDelete = async (req, res) => {
     return res.status(500).json({ error: error.toString() });
   }
 };
+
+// 사용자 전체 정보 조회
+exports.userList = async (req, res) => {
+  try {
+  } catch (error) {
+    return res.status(500).json({ error: error.toString() });
+  }
+};
