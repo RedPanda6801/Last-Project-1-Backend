@@ -97,3 +97,15 @@ exports.userDelete = async (req, res) => {
     return res.status(500).json({ error: error.toString() });
   }
 };
+
+// 사용자 전체 정보 조회
+exports.userList = async (req, res) => {
+  // 사용자 전체 리스트 조회
+  try {
+    const list = await userDao.selectList();
+    logger.info(`(userDao.selectLst)list up success`);
+    return res.status(200).json({ list });
+  } catch (error) {
+    return res.status(500).json({ error: error.toString() });
+  }
+};

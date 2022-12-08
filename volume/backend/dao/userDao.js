@@ -1,4 +1,3 @@
-const { Op } = require("sequelize");
 // const { User, Department } = require('../models/index');
 const { User } = require("../models/index");
 
@@ -23,38 +22,15 @@ const dao = {
       return new Error(error);
     }
   },
-  // 리스트 조회
-  async selectList(params) {
+  // 모든 유저의 리스트 조회
+  async selectList() {
     try {
-      // where 검색 조건
-      const setQuery = {};
-      if (params.name) {
-        setQuery.where = {
-          ...setQuery.where,
-          name: { [Op.like]: `%${params.name}%` }, // like검색
-        };
-      }
-      if (params.userid) {
-        setQuery.where = {
-          ...setQuery.where,
-          userid: params.userid, // '='검색
-        };
-      }
-
-      // order by 정렬 조건
-      setQuery.order = [["id", "DESC"]];
-
-      const findAll = await User.findAndCountAll({
-        ...setQuery,
-        attributes: { exclude: ["password"] }, // password 필드 제외
-        // include: [
-        //   {
-        //     model: Department,
-        //     as: 'Department',
-        //   },
-        // ],
+      const userList = await User.findAll({
+        attributes: {
+          exclude: ["password", "deletedAt", "createdAt", "updatedAt"],
+        }, // password 필드 제외
       });
-      return findAll;
+      return userList;
     } catch (error) {
       return new Error(error);
     }

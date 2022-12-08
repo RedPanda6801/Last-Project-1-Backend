@@ -17,10 +17,10 @@ exports.userLogin = async (req, res) => {
 
     // 입력값 null 체크
     if (!params.userid || !params.password) {
-      const err = new Error("Not allowed null (userid, password)");
-      logger.error(err.toString());
+      const error = new Error("Not allowed null (userid, password)");
+      logger.error(error.toString());
 
-      res.status(500).json({ err: err.toString() });
+      res.status(500).json({ error: error.toString() });
     }
 
     // 비즈니스 로직 호출
@@ -31,8 +31,8 @@ exports.userLogin = async (req, res) => {
     const token = tokenUtil.makeToken(result);
     // 최종 응답
     res.status(200).json({ token });
-  } catch (err) {
-    res.status(500).json({ err: err.toString() });
+  } catch (error) {
+    res.status(500).json({ error: error.toString() });
   }
 };
 
@@ -50,17 +50,17 @@ exports.userSign = async (req, res) => {
 
     // 입력값 null 체크
     if (!params.name || !params.userid || !params.password) {
-      const err = new Error("Not allowed null (name, userid, password)");
-      logger.error(err.toString());
+      const error = new Error("Not allowed null (name, userid, password)");
+      logger.error(error.toString());
 
-      res.status(500).json({ err: err.toString() });
+      res.status(500).json({ error: error.toString() });
     }
 
     // DB에 중복된 아이디가 있는지 확인
     if (await userDao.SelectByUserId(params.userid)) {
-      const err = new Error("user id is already existed!");
-      logger.error(err.toString());
-      res.status(500).json({ err: err.toString() });
+      const error = new Error("user id is already existed!");
+      logger.error(error.toString());
+      res.status(500).json({ error: error.toString() });
     }
     // root계정에 대한 권한 처리
     if (
@@ -77,7 +77,7 @@ exports.userSign = async (req, res) => {
     logger.info(`(user.reg.result) ${JSON.stringify(result)}`);
     // 최종 응답
     res.status(200).json(result);
-  } catch (err) {
-    res.status(500).json({ err: err.toString() });
+  } catch (error) {
+    res.status(500).json({ error: error.toString() });
   }
 };
