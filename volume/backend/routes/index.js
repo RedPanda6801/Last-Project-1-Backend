@@ -25,8 +25,8 @@ router.get("/log-test", (req, res, next) => {
 });
 
 router.use("/auths", authRouter);
-// router.use('/departments', departmentRouter);
 router.use("/users", userRouter);
+// router.use('/departments', departmentRouter);
 // router.use('/devices', deviceRouter);
 
 module.exports = router;

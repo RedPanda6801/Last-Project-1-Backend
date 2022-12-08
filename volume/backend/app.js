@@ -35,7 +35,6 @@ models.sequelize
     logger.error("DB Connection fail", err);
   });
 
-// app.use(logger('dev')); // 구코드 삭제
 app.use(
   cors({
     credentials: true,
