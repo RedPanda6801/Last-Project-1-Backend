@@ -3,7 +3,12 @@ const router = express.Router();
 const logger = require("../lib/logger");
 const userService = require("../service/userService");
 const { verifyToken } = require("../lib/tokenUtil");
-const { userInfo, userUpdate, userDelete } = require("../controllers/user");
+const {
+  userInfo,
+  userUpdate,
+  userDelete,
+  userList,
+} = require("../controllers/user");
 
 router.get("/", verifyToken, userInfo);
 router.put("/update/:userid", verifyToken, userUpdate);
