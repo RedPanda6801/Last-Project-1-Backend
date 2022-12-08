@@ -77,7 +77,6 @@ const dao = {
       const updated = await User.update(
         {
           name: params.name ? params.name : lastInfo.name,
-          role: params.role ? params.role : lastInfo.role,
           email: params.email ? params.email : lastInfo.email,
           phone: params.phone ? params.phone : lastInfo.phone,
         },

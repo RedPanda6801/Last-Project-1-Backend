@@ -25,7 +25,6 @@ exports.userUpdate = async (req, res) => {
     id: req.decoded.id,
     userid: req.params.userid, // url의 params로 받음
     name: req.body.name,
-    role: req.body.role,
     email: req.body.email,
     phone: req.body.phone,
   };
@@ -40,12 +39,6 @@ exports.userUpdate = async (req, res) => {
     const error = new Error("(userUpdate)userID is Not corrected!");
     logger.error(Error.toString());
     return res.status(500).json(error.toString());
-  }
-  // 역할을 관리자 권한으로 변경하려고 하는 경우의 예외처리
-  if (params.role === "관리자") {
-    const error = new Error("(userUpdate)Unauthorized Error");
-    logger.error(error.toString());
-    return res.status(500).json({ error: error.toString() });
   }
 
   // 바뀌기 전의 정보를 조회
