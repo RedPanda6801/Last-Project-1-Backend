@@ -3,10 +3,19 @@ const { User } = require("../models/index");
 
 const dao = {
   // 유저 아이디 중복 확인
-  async SelectByUserId(userid) {
+  async selectByUserId(userid) {
     try {
       const user = await User.findOne({ where: { userid } });
       return user;
+    } catch (error) {
+      return new Error(error);
+    }
+  },
+  // 이메일로 유저 찾기
+  async selectByEmail(email) {
+    try {
+      const email = await User.findOne({ where: { email } });
+      return email;
     } catch (error) {
       return new Error(error);
     }
