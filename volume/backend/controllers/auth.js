@@ -16,6 +16,7 @@ exports.userSign = async (req, res) => {
     logger.info(`(user.reg.params) ${JSON.stringify(params)}`);
 
     // 입력값 null 체크
+    check;
     if (!params.name || !params.userid || !params.password) {
       const error = new Error("Not allowed null (name, userid, password)");
       logger.error(error.toString());
@@ -55,7 +56,6 @@ exports.userLogin = async (req, res) => {
       userid: req.body.userid,
       password: req.body.password,
     };
-    console.log("파라미터", params);
     logger.info(`(auth.token.params) ${JSON.stringify(params)}`);
 
     // 입력값 null 체크
