@@ -1,23 +1,23 @@
 const Sequelize = require("sequelize");
 
-module.exports = class LogInfo extends Sequelize.Model {
+module.exports = class Log extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        content: {
-          type: Sequelize.STRING(500),
-          allowNull: false,
+        // log of controlled device
+        control: {
+          type: Sequelize.STRING(100),
         },
       },
       {
         sequelize,
         underscored: true, // true: underscored, false: camelCase
         timestamps: true, // createAt, updatedAt
-        paranoid: true, // deletedAt
       }
     );
   }
   static associate(db) {
-    db.LogInfo.belongsTo(db.Device);
+    db.Log.belongsTo(db.Device);
+    db.Log.belongsTo(db.User);
   }
 };

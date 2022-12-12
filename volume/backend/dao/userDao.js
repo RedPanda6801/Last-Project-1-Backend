@@ -1,4 +1,4 @@
-const { User } = require("../models/index");
+const { User, Cycle } = require("../models/index");
 
 const dao = {
   // 유저 아이디 중복 확인
@@ -13,8 +13,8 @@ const dao = {
   // 이메일로 유저 찾기
   async selectByEmail(email) {
     try {
-      const email = await User.findOne({ where: { email } });
-      return email;
+      const result = await User.findOne({ where: { email } });
+      return result;
     } catch (error) {
       return new Error(error);
     }
