@@ -1,4 +1,3 @@
-// const { User, Department } = require('../models/index');
 const { User } = require("../models/index");
 
 const dao = {
