@@ -2,9 +2,12 @@ const logger = require("../lib/logger");
 const tokenUtil = require("../lib/tokenUtil");
 const userService = require("../service/userService");
 const userDao = require("../dao/userDao");
+const httpRes = require("../lib/httpResponse");
 
+// 회원가입 API
 exports.userSign = async (req, res) => {
   try {
+    // 파라미터에 대한 선언
     const params = {
       name: req.body.name,
       userid: req.body.userid,
@@ -13,67 +16,62 @@ exports.userSign = async (req, res) => {
       email: req.body.email,
       phone: req.body.phone,
     };
-    logger.info(`(user.reg.params) ${JSON.stringify(params)}`);
+    logger.info(`(sign.params) ${JSON.stringify(params)}`);
 
     // 입력값 null 체크
     if (!params.name || !params.userid || !params.password) {
-      const error = new Error("Not allowed null (name, userid, password)");
-      logger.error(error.toString());
-
-      res.status(500).json({ error: error.toString() });
+      const error = httpRes.RES_NOT_NULL;
+      logger.error(error.message);
+      res.status(error.code).json(error);
     }
 
     // DB에 중복된 아이디가 있는지 확인
     if (await userDao.selectByUserId(params.userid)) {
-      const error = new Error("user id is already existed!");
-      logger.error(error.toString());
-      res.status(500).json({ error: error.toString() });
-    }
-    // root계정에 대한 권한 처리
-    if (
-      params.userid === process.env.ROOT_ID &&
-      params.password === process.env.ROOT_PASS
-    ) {
-      params.role = "관리자";
-    } else if (params.role === "관리자") {
-      params.role = "직원";
+      const error = httpRes.RES_EXISTED;
+      logger.error(error.message);
+      res.status(error.code).json(error);
     }
 
     // 비즈니스 로직 호출
-    const result = await userService.reg(params);
-    logger.info(`(user.reg.result) ${JSON.stringify(result)}`);
+    const result = await userService.signUp(params);
     // 최종 응답
-    res.status(200).json(result);
+    const response = httpRes.RES_SUCCESS;
+    logger.info(`(sign.userService.signUp) ${JSON.stringify(result)}`);
+    res.status(response.code).json({ response, result });
   } catch (error) {
-    res.status(500).json({ error: error.toString() });
+    logger.error(error.toString());
+    next(error);
   }
 };
 
+// 로그인 API
 exports.userLogin = async (req, res) => {
   try {
+    // 로그인 시에 파라미터를 받음
     const params = {
       userid: req.body.userid,
       password: req.body.password,
     };
-    logger.info(`(auth.token.params) ${JSON.stringify(params)}`);
+    logger.info(`(login.params) ${JSON.stringify(params)}`);
 
     // 입력값 null 체크
     if (!params.userid || !params.password) {
-      const error = new Error("Not allowed null (userid, password)");
-      logger.error(error.toString());
-
-      res.status(500).json({ error: error.toString() });
+      const error = httpRes.RES_NOT_NULL;
+      logger.error(error.message);
+      res.status(error.code).json(error);
     }
 
     // 비즈니스 로직 호출
     const result = await userService.login(params);
-    logger.info(`(auth.token.result) ${JSON.stringify(result)}`);
-
+    logger.info(`(login.userService.login) ${JSON.stringify(result)}`);
     // 토큰 생성
     const token = tokenUtil.makeToken(result);
+    logger.info(`(login.tokenUtil.makeToken) ${JSON.stringify(token)}`);
     // 최종 응답
-    res.status(200).json({ token });
+    const response = httpRes.RES_SUCCESS;
+    res.status(response.code).json({ token, response });
   } catch (error) {
-    res.status(500).json({ error: error.toString() });
+    logger.error(error.toString());
+    next(error);
   }
 };

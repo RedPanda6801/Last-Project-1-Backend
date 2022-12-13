@@ -1,111 +1,50 @@
 const logger = require("../lib/logger");
 const hashUtil = require("../lib/hashUtil");
 const userDao = require("../dao/userDao");
+const httpRes = require("../lib/httpResponse");
 
 const service = {
   // user 입력
-  async reg(params) {
+  async signUp(params) {
+    // root 이외의 계정에 대한 권한 처리
+    if (
+      params.userid === process.env.ROOT_ID &&
+      params.password === process.env.ROOT_PASS
+    ) {
+      params.role = "관리자";
+    } else if (params.role === "관리자") {
+      params.role = "직원";
+    }
+
     let inserted = null;
 
-    // 1. 비밀번호 암호화
+    // 비밀번호 암호화
     let hashPassword = null;
     try {
       hashPassword = await hashUtil.makePasswordHash(params.password);
       logger.debug(
-        `(userService.makePassword) ${JSON.stringify(params.password)}`
+        `(userService.hashUtil.makePasswordHash) ${JSON.stringify(
+          params.password
+        )}`
       );
+      // 500 에러에 대한 처리
     } catch (error) {
-      logger.error(`(userService.makePassword) ${err.toString()}`);
       return new Error(error);
     }
 
-    // 2. 사용자 등록 처리
+    // 사용자 등록 처리
     const newParams = {
       ...params,
       password: hashPassword,
     };
     try {
       inserted = await userDao.insert(newParams);
-      logger.debug(`(userDao.insert) ${JSON.stringify(inserted)}`);
-    } catch (err) {
-      logger.error(`(userDao.insert) ${err.toString()}`);
+      logger.debug(`(userService.userDao.insert) ${JSON.stringify(inserted)}`);
+    } catch (error) {
       return new Error(error);
     }
     // 결과값 리턴
     return inserted;
-  },
-
-  // selectList
-  async list(params) {
-    let result = null;
-
-    try {
-      result = await userDao.selectList(params);
-      logger.debug(`(userDao.selectList) ${JSON.stringify(result)}`);
-    } catch (err) {
-      logger.error(`(userDao.selectList) ${err.toString()}`);
-      return new Promise((resolve, reject) => {
-        reject(err);
-      });
-    }
-
-    return new Promise((resolve) => {
-      resolve(result);
-    });
-  },
-  // selectInfo
-  async info(params) {
-    let result = null;
-
-    try {
-      result = await userDao.selectInfo(params);
-      logger.debug(`(userDao.info) ${JSON.stringify(result)}`);
-    } catch (err) {
-      logger.error(`(userDao.info) ${err.toString()}`);
-      return new Promise((resolve, reject) => {
-        reject(err);
-      });
-    }
-
-    return new Promise((resolve) => {
-      resolve(result);
-    });
-  },
-  // update
-  async edit(params) {
-    let result = null;
-
-    try {
-      result = await userDao.update(params);
-      logger.debug(`(userService.edit) ${JSON.stringify(result)}`);
-    } catch (err) {
-      logger.error(`(userService.edit) ${err.toString()}`);
-      return new Promise((resolve, reject) => {
-        reject(err);
-      });
-    }
-
-    return new Promise((resolve) => {
-      resolve(result);
-    });
-  },
-  // delelte
-  async delete(params) {
-    let result = null;
-
-    try {
-      result = await userDao.delete(params);
-      logger.debug(`(userService.delete) ${JSON.stringify(result)}`);
-    } catch (err) {
-      logger.error(`(userService.delete) ${err.toString()}`);
-      return new Promise((resolve, reject) => {
-        reject(err);
-      });
-    }
-
-    return new Promise((resolve) => {
-      resolve(result);
-    });
   },
   // login 프로세스
   async login(params) {
@@ -113,51 +52,49 @@ const service = {
     let user = null;
     try {
       user = await userDao.selectUser(params);
-      logger.debug(`(userService.login) ${JSON.stringify(user)}`);
+      logger.debug(`(userService.userDao.selectUser) ${JSON.stringify(user)}`);
 
       // 해당 사용자가 없는 경우 튕겨냄
       if (!user) {
-        const err = new Error("Incorrect userid or password");
-        logger.error(err.toString());
-
-        return new Promise((resolve, reject) => {
-          reject(err);
+        const error = httpRes.RES_LOGIN_FAILED;
+        logger.error(error.message);
+        return new Promise((res, rej) => {
+          rej(error);
         });
       }
-    } catch (err) {
-      logger.error(`(userService.login) ${err.toString()}`);
-      return new Promise((resolve, reject) => {
-        reject(err);
+    } catch (error) {
+      logger.error(`${error.toString()}`);
+      return new Promise((res, rej) => {
+        rej(error);
       });
     }
 
-    // 2. 비밀번호 비교
+    // 비밀번호 비교
     try {
       const checkPassword = await hashUtil.checkPasswordHash(
         params.password,
         user.password
       );
-      logger.debug(`(userService.checkPassword) ${checkPassword}`);
+      logger.debug(`(userService.hashUtil.checkPasswordHash) ${checkPassword}`);
 
       // 비밀번호 틀린 경우 튕겨냄
       if (!checkPassword) {
-        const err = new Error("Incorect userid or password");
-        logger.error(err.toString());
+        const error = httpRes.RES_LOGIN_FAILED;
+        logger.error(error.message);
 
-        return new Promise((resolve, reject) => {
-          reject(err);
+        return new Promise((res, rej) => {
+          reject(error);
         });
       }
-    } catch (err) {
-      logger.error(`(userService.checkPassword) ${err.toString()}`);
-      return new Promise((resolve, reject) => {
-        reject(err);
+    } catch (error) {
+      logger.error(
+        `(userService.hashUtil.checkPasswordHash) ${error.toString()}`
+      );
+      return new Promise((res, rej) => {
+        rej(error);
       });
     }
-
-    return new Promise((resolve) => {
-      resolve(user);
-    });
+    return user;
   },
 };
 
