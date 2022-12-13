@@ -6,7 +6,7 @@ const userDao = require("../dao/userDao");
 exports.emailsender = async (req, res) => {
   try {
     const params = { email: req.params.email };
-    logger.info(`(emailsender.params)email: ${params}`);
+    logger.info(`(emailsender.params)email: ${params.email}`);
     // 파라미터 값에 대한 확인
     if (!params) {
       const error = new Error("(emailsender.email) No Data received");

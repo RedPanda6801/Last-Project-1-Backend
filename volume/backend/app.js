@@ -13,7 +13,7 @@ const indexRouter = require("./routes/index");
 const app = express();
 
 // MQTT 연결
-// mqttConnect();
+mqttConnect();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

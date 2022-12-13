@@ -16,7 +16,6 @@ exports.userSign = async (req, res) => {
     logger.info(`(user.reg.params) ${JSON.stringify(params)}`);
 
     // 입력값 null 체크
-    check;
     if (!params.name || !params.userid || !params.password) {
       const error = new Error("Not allowed null (name, userid, password)");
       logger.error(error.toString());

@@ -1,37 +1,42 @@
 const Sequelize = require("sequelize");
 
-module.exports = class Device extends Sequelize.Model {
+module.exports = class Cycle extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        state: {
-          type: Sequelize.BOOLEAN,
-          allowNull: false,
-        },
+        // amount per one cycle
         work: {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
-        product: {
+        // good or bad
+        good: {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
-        defective: {
+        bad: {
           type: Sequelize.INTEGER,
+          allowNull: false,
+        },
+        // time of start
+        start: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+        // time of end
+        end: {
+          type: Sequelize.DATE,
           allowNull: false,
         },
       },
       {
         sequelize,
         underscored: true, // true: underscored, false: camelCase
-        timestamps: true, // createAt, updatedAt
       }
     );
   }
-
   static associate(db) {
-    db.Device.belongsTo(db.User);
-    db.Device.hasMany(db.Cycle);
-    db.Device.hasMany(db.Log);
+    db.Cycle.belongsTo(db.Device);
+    db.Cycle.belongsTo(db.User);
   }
 };
