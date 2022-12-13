@@ -24,7 +24,8 @@ exports.userSign = async (req, res) => {
     }
 
     // DB에 중복된 아이디가 있는지 확인
-    if (await userDao.selectByUserId(params.userid)) {
+    const isUserId = await userDao.selectByUserId(params.userid);
+    if (isUserId) {
       const error = new Error("user id is already existed!");
       logger.error(error.toString());
       res.status(500).json({ error: error.toString() });
