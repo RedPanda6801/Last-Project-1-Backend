@@ -1,7 +1,6 @@
 const mqtt = require("mqtt");
-const axios = require("axios");
 const deviceDao = require("../dao/deviceDao");
-
+const dayUtil = require("../lib/dayUtil");
 let start = false;
 let isRunning = false;
 const dataObj = {};

@@ -1,4 +1,6 @@
 const { Cycle } = require("../models/index");
+const dayUtil = require("../lib/dayUtil");
+const { Op } = require("sequelize");
 
 const dao = {
   async insertCycleData(data) {
@@ -14,6 +16,41 @@ const dao = {
         bad,
         start,
         end,
+      });
+      return result;
+    } catch (error) {
+      return new Error(error);
+    }
+  },
+  async insertDevice() {
+    try {
+      const result = await Device.create({
+        state: true,
+        work: 0,
+        product: 0,
+        defective: 0,
+      });
+      return result;
+    } catch (error) {
+      return new Error(error);
+    }
+  },
+  async selectAllCycle() {
+    try {
+      const result = await Cycle.findAll({
+        attributes: { exclude: ["updatedAt"] },
+      });
+      return result;
+    } catch (error) {
+      return new Error(error);
+    }
+  },
+  async selectTodayCycle(date) {
+    try {
+      const { startDate, endDate } = dayUtil.getTodayWorkTime(date);
+      console.log(startDate, endDate);
+      const result = Cycle.findAll({
+        where: { start: { [Op.between]: [startDate, endDate] } },
       });
       return result;
     } catch (error) {
