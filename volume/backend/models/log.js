@@ -4,9 +4,15 @@ module.exports = class Log extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        // log of controlled device
+        // log of controlled device(start, stop, reset)
         control: {
           type: Sequelize.STRING(100),
+          allowNull: false,
+        },
+        // state of emergency(emergency is FALSE)
+        state: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
         },
       },
       {

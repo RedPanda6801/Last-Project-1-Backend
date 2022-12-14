@@ -15,6 +15,14 @@ const response = {
     code: 400,
     message: "Incorrect Userid Or Password",
   },
+  RES_NO_DATA: {
+    code: 400,
+    message: "No Data In DB",
+  },
+  RES_WRONG_DATA: {
+    code: 400,
+    message: "Incorrected Data is Inputed",
+  },
 };
 
 module.exports = response;

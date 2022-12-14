@@ -28,4 +28,5 @@ router.use("/auths", authRouter);
 router.use("/users", userRouter);
 router.use("/mails", mailRouter);
 router.use("/devices", deviceRouter);
+
 module.exports = router;

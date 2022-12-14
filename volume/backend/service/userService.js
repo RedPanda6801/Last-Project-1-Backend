@@ -83,7 +83,7 @@ const service = {
         logger.error(error.message);
 
         return new Promise((res, rej) => {
-          reject(error);
+          rej(error);
         });
       }
     } catch (error) {
