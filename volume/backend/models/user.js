@@ -39,6 +39,10 @@ module.exports = class User extends Sequelize.Model {
 
   static associate(db) {
     db.User.hasMany(db.Cycle);
-    db.User.hasMany(db.Device);
+    db.User.belongsToMany(db.Device, {
+      through: "Management",
+      as: "Managers",
+      foreignKey: "deviceId",
+    });
   }
 };

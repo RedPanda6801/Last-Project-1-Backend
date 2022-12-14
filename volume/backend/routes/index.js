@@ -4,6 +4,7 @@ const authRouter = require("./auth");
 const mailRouter = require("./mail");
 const userRouter = require("./user");
 const deviceRouter = require("./device");
+const manageRouter = require("./manage");
 
 const router = express.Router();
 
@@ -28,5 +29,6 @@ router.use("/auths", authRouter);
 router.use("/users", userRouter);
 router.use("/mails", mailRouter);
 router.use("/devices", deviceRouter);
+router.use("/manage", manageRouter);
 
 module.exports = router;

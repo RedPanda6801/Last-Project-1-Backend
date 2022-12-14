@@ -35,7 +35,6 @@ exports.findTodayCycleData = async (req, res, next) => {
     const params = {
       date: req.params.date,
     };
-
     const todayData = await deviceDao.selectTodayCycle(params.date);
     console.log(todayData);
     return res.status(200).json({ data: todayData });
@@ -58,7 +57,7 @@ exports.getDeviceData = async (req, res, next) => {
       return res.status(error.code).json(error);
     }
     // DB에서 device를 찾음
-    const data = await deviceDao.selectDeviceById(params.deviceId);
+    const data = await deviceDao.selectDeviceById(params.deviceid);
     logger.info(
       `(devices.deviceDao.selectDeviceById)data : ${JSON.stringify(data)}`
     );
@@ -86,7 +85,8 @@ exports.controlDevice = async (req, res, next) => {
       !params.userid ||
       !params.deviceid ||
       !params.control ||
-      !params.state
+      params.state === undefined ||
+      params.state === null
     ) {
       const error = httpRes.RES_NOT_NULL;
       logger.error(`(control.params)${error.message}`);
