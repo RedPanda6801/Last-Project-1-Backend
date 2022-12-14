@@ -23,6 +23,10 @@ const response = {
     code: 400,
     message: "Incorrected Data is Inputed",
   },
+  RES_UNAUTHORIZED: {
+    code: 403,
+    message: "Unauthorized Error",
+  },
 };
 
 module.exports = response;

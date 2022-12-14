@@ -1,5 +1,6 @@
 const logger = require("../lib/logger");
 const userDao = require("../dao/userDao");
+const httpRes = require("../lib/httpResponse");
 
 // 현재 사용자 단일 조회
 exports.userInfo = async (req, res) => {
@@ -101,12 +102,10 @@ exports.userDelete = async (req, res) => {
 // 사용자 전체 정보 조회
 exports.userList = async (req, res) => {
   // 팀원은 조회할 수 없게 함
-  if (req.decoded.role === "팀원") {
-    const error = new Error("(userList.checkRole)Unauthorizated User");
-    logger.error(error.toString());
-    return res
-      .status(400)
-      .json({ error: error.toString(), role: req.decoded.role });
+  if (!(req.decoded.role === "팀장" && req.decoded.role === "관리자")) {
+    const error = httpRes.RES_UNAUTHORIZED;
+    logger.error(`(list.decoded.role)${error.message}`);
+    return res.status(error.code).json(error);
   }
   try {
     const list = await userDao.selectList();
