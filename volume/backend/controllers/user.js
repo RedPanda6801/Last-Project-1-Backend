@@ -100,7 +100,7 @@ exports.userDelete = async (req, res) => {
 };
 
 // 사용자 전체 정보 조회
-exports.userList = async (req, res) => {
+exports.userList = async (req, res, next) => {
   // 팀원은 조회할 수 없게 함
   if (!(req.decoded.role === "팀장" && req.decoded.role === "관리자")) {
     const error = httpRes.RES_UNAUTHORIZED;
@@ -108,10 +108,14 @@ exports.userList = async (req, res) => {
     return res.status(error.code).json(error);
   }
   try {
-    const list = await userDao.selectList();
-    logger.info(`(userDao.selectLst)list up success`);
-    return res.status(200).json({ list });
+    // 리스트 조회
+    const data = await userDao.selectList();
+    // 조회 결과
+    const response = httpRes.RES_SUCCESS;
+    logger.info(`(list.userDao.selectLst)list : ${JSON.stringify(data)}`);
+    return res.status(response.code).json({ response, data });
   } catch (error) {
-    return res.status(500).json({ error: error.toString() });
+    logger.error(error.toString());
+    next(error);
   }
 };

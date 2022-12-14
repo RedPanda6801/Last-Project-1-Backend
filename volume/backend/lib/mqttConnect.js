@@ -52,8 +52,8 @@ exports.mqttConnect = () => {
         // 멈추고 이전에 작동하고 있었으면
       } else if (!start && isRunning) {
         // 받은 데이터들을 모두 추가해줌
-        if (!dataObj.userId) dataObj.userId = 0;
-        if (!dataObj.deviceId) dataObj.deviceId = 0;
+        if (!dataObj.userId) dataObj.userId = 1;
+        if (!dataObj.deviceId) dataObj.deviceId = 1;
         dataJSON.forEach((data) => {
           switch (data.tagId) {
             // 총 양품량
@@ -79,7 +79,7 @@ exports.mqttConnect = () => {
         // Cycle Data DB에 추가
         try {
           const insert = await deviceDao.insertCycleData(dataObj);
-          console.log(insert);
+          console.log(JSON.stringify(insert));
         } catch (error) {
           console.log(error);
         }

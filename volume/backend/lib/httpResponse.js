@@ -24,8 +24,12 @@ const response = {
     message: "Incorrected Data is Inputed",
   },
   RES_UNAUTHORIZED: {
-    code: 403,
+    code: 401,
     message: "Unauthorized Error",
+  },
+  RES_FORBIDDEN: {
+    code: 403,
+    message: "Forbidden Error",
   },
 };
 
