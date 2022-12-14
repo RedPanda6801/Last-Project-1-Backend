@@ -55,7 +55,7 @@ const middleware = {
           userid: process.env.ROOT_ID,
           password: hashPassword,
           role: "관리자",
-          email: "root@UVC-company.com",
+          email: "root",
           phone: "010-1234-5678",
         });
         logger.debug("(middleware.findRootAccount.root)Root Created", root);
