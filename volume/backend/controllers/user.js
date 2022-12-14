@@ -100,8 +100,6 @@ exports.userDelete = async (req, res) => {
 
 // 사용자 전체 정보 조회
 exports.userList = async (req, res) => {
-  // 사용자 전체 리스트 조회
-
   // 팀원은 조회할 수 없게 함
   if (req.decoded.role === "팀원") {
     const error = new Error("(userList.checkRole)Unauthorizated User");

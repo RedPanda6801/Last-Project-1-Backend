@@ -5,7 +5,7 @@ const userDao = require("../dao/userDao");
 const httpRes = require("../lib/httpResponse");
 
 // 회원가입 API
-exports.userSign = async (req, res) => {
+exports.userSign = async (req, res, next) => {
   try {
     // 파라미터에 대한 선언
     const params = {
@@ -21,14 +21,14 @@ exports.userSign = async (req, res) => {
     // 입력값 null 체크
     if (!params.name || !params.userid || !params.password) {
       const error = httpRes.RES_NOT_NULL;
-      logger.error(error.message);
+      logger.error(`(sign.params)${error.message}`);
       res.status(error.code).json(error);
     }
 
     // DB에 중복된 아이디가 있는지 확인
     if (await userDao.selectByUserId(params.userid)) {
       const error = httpRes.RES_EXISTED;
-      logger.error(error.message);
+      logger.error(`(sign.userDao.selectByUserId)${error.message}`);
       res.status(error.code).json(error);
     }
 
@@ -45,7 +45,7 @@ exports.userSign = async (req, res) => {
 };
 
 // 로그인 API
-exports.userLogin = async (req, res) => {
+exports.userLogin = async (req, res, next) => {
   try {
     // 로그인 시에 파라미터를 받음
     const params = {
@@ -57,7 +57,7 @@ exports.userLogin = async (req, res) => {
     // 입력값 null 체크
     if (!params.userid || !params.password) {
       const error = httpRes.RES_NOT_NULL;
-      logger.error(error.message);
+      logger.error(`(login.params)${error.message}`);
       res.status(error.code).json(error);
     }
 

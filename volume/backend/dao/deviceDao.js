@@ -1,4 +1,4 @@
-const { Cycle } = require("../models/index");
+const { Cycle, Device, Log } = require("../models/index");
 const dayUtil = require("../lib/dayUtil");
 const { Op } = require("sequelize");
 
@@ -22,16 +22,16 @@ const dao = {
       return new Error(error);
     }
   },
-  async insertDevice() {
+  async insertDevice(params) {
     try {
+      const lastData = await Device.findAndCountAll({ attributes: ["name"] });
       const result = await Device.create({
-        state: true,
-        work: 0,
-        product: 0,
-        defective: 0,
+        name: `${lastData.count + 1}호기`,
+        UserId: params.userid,
       });
       return result;
     } catch (error) {
+      console.log(error);
       return new Error(error);
     }
   },
@@ -49,8 +49,29 @@ const dao = {
     try {
       const { startDate, endDate } = dayUtil.getTodayWorkTime(date);
       console.log(startDate, endDate);
-      const result = Cycle.findAll({
+      const result = await Cycle.findAll({
         where: { start: { [Op.between]: [startDate, endDate] } },
+      });
+      return result;
+    } catch (error) {
+      return new Error(error);
+    }
+  },
+  async selectDeviceById(id) {
+    try {
+      const result = await Device.findOne({ where: { id } });
+      return result;
+    } catch (error) {
+      return new Error(error);
+    }
+  },
+  async insertDeviceLog(params) {
+    try {
+      const result = await Log.create({
+        DeviceId: params.deviceid,
+        UserId: params.userid,
+        control: params.control,
+        state: params.state,
       });
       return result;
     } catch (error) {

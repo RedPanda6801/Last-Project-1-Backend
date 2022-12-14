@@ -4,20 +4,9 @@ module.exports = class Device extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        state: {
-          type: Sequelize.BOOLEAN,
-          allowNull: false,
-        },
-        work: {
-          type: Sequelize.INTEGER,
-          allowNull: false,
-        },
-        product: {
-          type: Sequelize.INTEGER,
-          allowNull: false,
-        },
-        defective: {
-          type: Sequelize.INTEGER,
+        // name of device
+        name: {
+          type: Sequelize.STRING(100),
           allowNull: false,
         },
       },

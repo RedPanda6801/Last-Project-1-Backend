@@ -1,8 +1,8 @@
 const logger = require("./logger");
 const tokenUtil = require("./tokenUtil");
 const { User } = require("../models/index");
-const bcrypt = require("bcrypt");
 const userDao = require("../dao/userDao");
+const hashUtil = require("./hashUtil");
 
 const middleware = {
   // 로그인 체크
@@ -44,7 +44,9 @@ const middleware = {
       // Root 계정이 없으면 비밀번호로 한번더 암호화 확인
       if (!isRoot) {
         // 비밀번호 암호화
-        const hashPassword = await bcrypt.hash(process.env.ROOT_PASS, 12);
+        const hashPassword = await hashUtil.makePasswordHash(
+          process.env.ROOT_PASS
+        );
         logger.debug("(findRootAccount.bcrypt.hash)hash :", hashPassword);
 
         // 그대로 계정을 추가
