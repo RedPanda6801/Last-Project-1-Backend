@@ -42,7 +42,7 @@ module.exports = class User extends Sequelize.Model {
     db.User.belongsToMany(db.Device, {
       through: "Management",
       as: "Managers",
-      foreignKey: "deviceId",
+      foreignKey: "userId",
     });
   }
 };
