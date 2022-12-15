@@ -22,7 +22,10 @@ exports.addDevice = async (req, res, next) => {
 };
 exports.findAllCycleData = async (req, res, next) => {
   try {
-    const data = await deviceDao.selectAllCycle();
+    const params = {
+      deviceid: req.params.id,
+    };
+    const data = await deviceDao.selectAllCycle(params);
     logger.info(`(findAllCycleData.deviceDao.selectAllCycle)Data: ${data}`);
     return res.status(200).json({ data });
   } catch (error) {
@@ -34,9 +37,9 @@ exports.findTodayCycleData = async (req, res, next) => {
   try {
     const params = {
       date: req.params.date,
+      deviceid: req.params.id,
     };
-    const todayData = await deviceDao.selectTodayCycle(params.date);
-    console.log(todayData);
+    const todayData = await deviceDao.selectTodayCycle(params);
     return res.status(200).json({ data: todayData });
   } catch (error) {
     logger.error(error.toString());
