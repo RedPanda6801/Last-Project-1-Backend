@@ -1,17 +1,22 @@
 const mqtt = require("mqtt");
 const deviceDao = require("../dao/deviceDao");
+const logger = require("./logger");
+
+// 작업 상태 변수 선언
 let start = false;
 let isRunning = false;
-let reset = false;
 
+// DB에 넣을 값 선언
 let dataObj = {
-  userId: null,
-  deviceId: null,
-  work: 0,
-  good: 0,
-  bad: 0,
+  userId: null, // 현재 작업자
+  deviceId: null, // 현재 작업 기기
+  start: null, // 시작시간
+  work: 0, // 총 작업량
+  second: 0, // 2호기 작업량
+  trd: 0, // 3호기 작업량
+  good: 0, // 양품 개수
+  bad: 0, // 불량품 개수
 };
-let startDate = null;
 
 exports.mqttConnect = () => {
   const client = mqtt.connect("mqtt://192.168.0.63");
@@ -31,79 +36,97 @@ exports.mqttConnect = () => {
   // 메세지 처리
   client.on("message", async function (topic, message) {
     // topic을 조건문으로 비교하여 메세지를 처리
-    if (topic === "pubmyEdukit") {
-      const data = JSON.parse(message.toString());
-      dataObj.userId = data.userId;
-      dataObj.deviceId = data.deviceId;
-    } else if (topic === "myEdukit") {
-      console.log("Device Connected");
-      console.log(dataObj);
-      // 받은 데이터를 json 형태로 바꾸어줌
-      const dataJSON = JSON.parse(message.toString()).Wrapper;
-      // 시작값 초기화
-      dataJSON.forEach((data) => {
-        switch (data.tagId) {
-          case "1":
-            start = data.value;
-            break;
-          case "8":
-            dataObj.work = 0;
-            dataObj.bad = 0;
-            dataObj.good = 0;
-        }
-        if (data.tagId == 1) {
-          start = data.value;
-        }
-      });
-      // 작업중일 때
-      if (start) {
-        // 작업 시작할 때 한번만
-        if (!isRunning) {
-          console.log("device running!");
-          isRunning = true;
-          // 작업 시작 시간
-          dataObj.start = dataJSON.forEach((data) => {
-            if (data.tagId == 0) {
-              startDate = data.value;
-              console.log("Start Time: ", startDate);
-            }
-          });
-        }
-        // 멈추고 이전에 작동하고 있었으면
-      } else if (!start && isRunning) {
-        // 받은 데이터들을 모두 추가해줌
-        if (!dataObj.userId) dataObj.userId = 1;
-        if (!dataObj.deviceId) dataObj.deviceId = 1;
+    switch (topic) {
+      // 제어 시에 클라이언트와 장치 정보 받아오기
+      case "pubmyEdukit":
+        const data = JSON.parse(message.toString());
+        dataObj.userId = data.userId;
+        dataObj.deviceId = data.deviceId;
+        break;
+      // 작동 시에 데이터 받아오기
+      case "myEdukit":
+        console.log("Device Connected");
+        // 받은 데이터를 json 형태로 바꾸어줌
+        const dataJSON = JSON.parse(message.toString()).Wrapper;
+        // 시작 여부 주시 (작업 시작 시에 한번만 요청하는 것을 필요로 함)
         dataJSON.forEach((data) => {
-          switch (data.tagId) {
-            // 총 양품량
-            case "17":
-              dataObj.good = parseInt(data.value);
-              break;
-            // 총 작업량
-            case "15":
-              dataObj.work = parseInt(data.value);
-              break;
-            // 작업 완료 시간
-            case "0":
-              dataObj.end = data.value;
+          if (data.tagId == 1) {
+            start = data.value;
           }
         });
-        // 불량품 = 작업량 - 양품
-        dataObj.bad = parseInt(dataObj.work) - parseInt(dataObj.good);
-        dataObj.start = startDate;
-        console.log("Data per One Cycle: ", dataObj);
-        // 작업이 끝나면 false
-        isRunning = false;
+        // 작업 시작 시에 한번만 확인
+        if (start) {
+          // 작업 시작할 때 한번만
+          if (!isRunning) {
+            console.log("device running!");
+            // 작업 변수 세팅
+            isRunning = true;
 
-        // Cycle Data DB에 추가
-        try {
-          const insert = await deviceDao.insertCycleData(dataObj);
-          console.log(JSON.stringify(insert));
-        } catch (error) {
-          console.log(error);
+            // 작업 시작 시에 해야할 일
+            dataJSON.forEach((data) => {
+              switch (data.tagId) {
+                // 작업 시작 시간
+                case "0":
+                  dataObj.start = data.value;
+                  console.log("Start Time: ", dataObj.start);
+                  break;
+                case "15":
+                  // 시작했을 때 리셋되어 있다면 object 초기화
+                  if (data.value == 0) {
+                    console.log(data.name, data.value);
+                    dataObj.good = 0;
+                    dataObj.bad = 0;
+                    dataObj.work = 0;
+                    dataObj.second = 0;
+                    dataObj.dice = 0;
+                    dataObj.trd = 0;
+                  }
+              }
+            });
+          }
+          // 멈추고 이전에 작동하고 있었으면
+        } else if (!start && isRunning) {
+          // 수동 조작 시에 관리자 및 1번 기기 값을 넣음
+          if (!dataObj.userId) dataObj.userId = 1;
+          if (!dataObj.deviceId) dataObj.deviceId = 1;
+
+          // 작업 종료 시에 데이터 정제 및 저장
+          dataJSON.forEach((data) => {
+            switch (data.tagId) {
+              // 사이클 작업 완료 시간
+              case "0":
+                dataObj.end = data.value;
+              // 사이클 작업량 = 총 작업량 - 이전 사이클 작업량
+              case "15":
+                dataObj.work = parseInt(data.value) - dataObj.work;
+                break;
+              // 2호기 작업량
+              case "16":
+                dataObj.second = parseInt(data.value) - dataObj.second;
+              // 사이클 양품량 = 총 작업량 - 이전 사이클 작업량
+              case "17":
+                dataObj.trd = parseInt(data.value) - dataObj.trd;
+                break;
+            }
+          });
+          // 불량품 = 3호기 작동 X + 2호기 작동 X
+          dataObj.bad = 2 * dataObj.work - dataObj.trd + dataObj.second;
+          // 양품 = 전체 작업량 - 불량품
+          dataObj.good = dataObj.work - dataObj.bad;
+          // 사이클 당 작업 데이터 로그
+          logger.info("Data per One Cycle: ", dataObj);
+          // 작업이 끝나면 false
+          isRunning = false;
+
+          // Cycle Data DB에 추가
+          try {
+            const insert = await deviceDao.insertCycleData(dataObj);
+            console.log(JSON.stringify(insert));
+          } catch (error) {
+            console.log(error);
+          }
         }
-      }
+        break;
     }
   });
 };
