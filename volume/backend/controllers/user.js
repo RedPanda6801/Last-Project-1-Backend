@@ -102,7 +102,7 @@ exports.userDelete = async (req, res) => {
 // 사용자 전체 정보 조회
 exports.userList = async (req, res, next) => {
   // 팀원은 조회할 수 없게 함
-  if (!(req.decoded.role === "팀장" && req.decoded.role === "관리자")) {
+  if (!(req.decoded.role === "팀장" || req.decoded.role === "관리자")) {
     const error = httpRes.RES_UNAUTHORIZED;
     logger.error(`(list.decoded.role)${error.message}`);
     return res.status(error.code).json(error);
