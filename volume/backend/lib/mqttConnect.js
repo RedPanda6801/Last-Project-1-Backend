@@ -1,13 +1,21 @@
 const mqtt = require("mqtt");
 const deviceDao = require("../dao/deviceDao");
-const dayUtil = require("../lib/dayUtil");
 let start = false;
 let isRunning = false;
-const dataObj = {};
+let reset = false;
+
+let dataObj = {
+  userId: null,
+  deviceId: null,
+  work: 0,
+  good: 0,
+  bad: 0,
+};
 let startDate = null;
 
 exports.mqttConnect = () => {
   const client = mqtt.connect("mqtt://192.168.0.63");
+
   // 메인페이지에 들어왔을때 최초 연결 시 subscirbe 해줌
   client.on("connect", function () {
     console.log("Connection Success");
@@ -19,6 +27,8 @@ exports.mqttConnect = () => {
       if (error) console.log(error);
     });
   });
+
+  // 메세지 처리
   client.on("message", async function (topic, message) {
     // topic을 조건문으로 비교하여 메세지를 처리
     if (topic === "pubmyEdukit") {
@@ -27,10 +37,20 @@ exports.mqttConnect = () => {
       dataObj.deviceId = data.deviceId;
     } else if (topic === "myEdukit") {
       console.log("Device Connected");
+      console.log(dataObj);
       // 받은 데이터를 json 형태로 바꾸어줌
       const dataJSON = JSON.parse(message.toString()).Wrapper;
       // 시작값 초기화
       dataJSON.forEach((data) => {
+        switch (data.tagId) {
+          case "1":
+            start = data.value;
+            break;
+          case "8":
+            dataObj.work = 0;
+            dataObj.bad = 0;
+            dataObj.good = 0;
+        }
         if (data.tagId == 1) {
           start = data.value;
         }
@@ -43,7 +63,7 @@ exports.mqttConnect = () => {
           isRunning = true;
           // 작업 시작 시간
           dataObj.start = dataJSON.forEach((data) => {
-            if (data.tagId === "0") {
+            if (data.tagId == 0) {
               startDate = data.value;
               console.log("Start Time: ", startDate);
             }
@@ -58,11 +78,11 @@ exports.mqttConnect = () => {
           switch (data.tagId) {
             // 총 양품량
             case "17":
-              dataObj.good = data.value;
+              dataObj.good = parseInt(data.value);
               break;
             // 총 작업량
             case "15":
-              dataObj.work = data.value;
+              dataObj.work = parseInt(data.value);
               break;
             // 작업 완료 시간
             case "0":

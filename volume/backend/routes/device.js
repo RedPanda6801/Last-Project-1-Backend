@@ -1,5 +1,5 @@
 const express = require("express");
-const { verifyToken } = require("../lib/tokenUtil");
+const { verifyToken, verifyRoot } = require("../lib/tokenUtil");
 const {
   addDevice,
   findAllCycleData,
@@ -9,8 +9,8 @@ const {
 } = require("../controllers/device");
 const router = express.Router();
 
-router.post("/insert", verifyToken, addDevice);
-router.get("/find-cycle-all", verifyToken, findAllCycleData);
+router.post("/insert", verifyRoot, addDevice);
+router.get("/find-cycle-all", findAllCycleData);
 router.get("/find-cycle-today", findTodayCycleData);
 router.get("/:id", verifyToken, getDeviceData);
 router.post("/control", verifyToken, controlDevice);
