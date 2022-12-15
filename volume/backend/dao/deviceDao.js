@@ -35,9 +35,10 @@ const dao = {
       return new Error(error);
     }
   },
-  async selectAllCycle() {
+  async selectAllCycle(params) {
     try {
       const result = await Cycle.findAll({
+        where: { DeviceId: params.deviceid },
         attributes: { exclude: ["updatedAt"] },
       });
       return result;
@@ -45,12 +46,15 @@ const dao = {
       return new Error(error);
     }
   },
-  async selectTodayCycle(date) {
+  async selectTodayCycle(params) {
     try {
-      const { startDate, endDate } = dayUtil.getTodayWorkTime(date);
+      const { startDate, endDate } = dayUtil.getTodayWorkTime(params.date);
       console.log(startDate, endDate);
       const result = await Cycle.findAll({
-        where: { start: { [Op.between]: [startDate, endDate] } },
+        where: {
+          start: { [Op.between]: [startDate, endDate] },
+          DeviceId: params.deviceid,
+        },
       });
       return result;
     } catch (error) {
