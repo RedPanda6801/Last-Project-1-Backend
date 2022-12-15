@@ -1,10 +1,12 @@
 const mqtt = require("mqtt");
 const deviceDao = require("../dao/deviceDao");
+const logDao = require("../dao/logDao");
 const logger = require("./logger");
 
 // 작업 상태 변수 선언
 let start = false;
 let isRunning = false;
+let diceChecking = [false, false]; // 주시 & 판별여부
 
 // DB에 넣을 값 선언
 let dataObj = {
@@ -16,10 +18,11 @@ let dataObj = {
   trd: 0, // 3호기 작업량
   good: 0, // 양품 개수
   bad: 0, // 불량품 개수
+  dice: [], // 판별된 다이스 숫자
 };
 
 exports.mqttConnect = () => {
-  const client = mqtt.connect("mqtt://192.168.0.63");
+  const client = mqtt.connect("mqtt://192.168.0.50");
 
   // 메인페이지에 들어왔을때 최초 연결 시 subscirbe 해줌
   client.on("connect", function () {
@@ -48,13 +51,27 @@ exports.mqttConnect = () => {
         console.log("Device Connected");
         // 받은 데이터를 json 형태로 바꾸어줌
         const dataJSON = JSON.parse(message.toString()).Wrapper;
-        // 시작 여부 주시 (작업 시작 시에 한번만 요청하는 것을 필요로 함)
+        // 연결 시에 지속적으로 데이터 받아오기
         dataJSON.forEach((data) => {
-          if (data.tagId == 1) {
-            start = data.value;
+          switch (data.tagId) {
+            // 시작 여부 주시
+            case "1":
+              start = data.value;
+              break;
+            // 1호기 작동 시에 다이스 체크 false로 세팅
+            case "3":
+              if (data.value && diceChecking[1]) diceChecking[1] = false;
+            // 주사위 0이 아니면 다이스 체크중
+            case "37":
+              if (data.value != 0) {
+                diceChecking[0] = true;
+              } else {
+                diceChecking[0] = false;
+              }
+              break;
           }
         });
-        // 작업 시작 시에 한번만 확인
+        // 작업 시작
         if (start) {
           // 작업 시작할 때 한번만
           if (!isRunning) {
@@ -80,7 +97,21 @@ exports.mqttConnect = () => {
                     dataObj.second = 0;
                     dataObj.dice = 0;
                     dataObj.trd = 0;
+                    dataObj.dice = [];
                   }
+              }
+            });
+          }
+          // 다이스에 처음 값이 들어왔을 때 (주시 O, 체크 X)
+          if (diceChecking[0] && !diceChecking[1]) {
+            console.log("Dice Check Success");
+            dataJSON.forEach((data) => {
+              switch (data.tagId) {
+                case "37":
+                  diceChecking[1] = true; // 체크 확인
+                  console.log(`다이스 확인: ${data.value} / ${dataObj.dice}`);
+                  // 배열에 다이스 값 추가 (한번만)
+                  dataObj.dice.push(data.value);
               }
             });
           }
@@ -118,10 +149,13 @@ exports.mqttConnect = () => {
           // 작업이 끝나면 false
           isRunning = false;
 
-          // Cycle Data DB에 추가
           try {
-            const insert = await deviceDao.insertCycleData(dataObj);
-            console.log(JSON.stringify(insert));
+            // 데이터 추가
+            const insertDice = await logDao.setDiceNum(dataObj.dice);
+            const insertData = await deviceDao.insertCycleData(dataObj);
+
+            console.log(JSON.stringify(insertDice));
+            console.log(JSON.stringify(insertData));
           } catch (error) {
             console.log(error);
           }

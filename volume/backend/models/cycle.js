@@ -38,6 +38,5 @@ module.exports = class Cycle extends Sequelize.Model {
   static associate(db) {
     db.Cycle.belongsTo(db.Device);
     db.Cycle.belongsTo(db.User);
-    db.Cycle.hasOne(db.Dice);
   }
 };

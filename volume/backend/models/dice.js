@@ -30,7 +30,5 @@ module.exports = class Dice extends Sequelize.Model {
       }
     );
   }
-  static associate(db) {
-    db.Dice.hasOne(db.Cycle);
-  }
+  static associate(db) {}
 };
