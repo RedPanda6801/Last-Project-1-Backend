@@ -24,9 +24,14 @@ const dao = {
   },
   async insertDevice(params) {
     try {
-      const lastData = await Device.findAndCountAll({ attributes: ["name"] });
+      // 추가할 호기 이름 = 마지막 호기 + 1
+      const allDevice = await Device.findAll({ attributes: ["name"] });
+      // 마지막 장치의 이름 데이터를 받기 위한 코드
+      const lastDevice = allDevice[allDevice.length - 1];
+      const num = lastDevice ? parseInt(lastDevice.name.split("호기")[0]) : 0;
+      // ORM 호출
       const result = await Device.create({
-        name: `${lastData.count + 1}호기`,
+        name: `${num + 1}호기`,
         UserId: params.userid,
       });
       return result;
