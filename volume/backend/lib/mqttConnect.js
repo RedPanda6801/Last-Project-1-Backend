@@ -18,7 +18,7 @@ let dataObj = {
   trd: 0, // 3호기 작업량
   good: 0, // 양품 개수
   bad: 0, // 불량품 개수
-  dice: [], // 판별된 다이스 숫자
+  dice: [0, 0, 0, 0, 0, 0], // 판별된 다이스 숫자
 };
 
 exports.mqttConnect = () => {
@@ -97,7 +97,7 @@ exports.mqttConnect = () => {
                     dataObj.second = 0;
                     dataObj.dice = 0;
                     dataObj.trd = 0;
-                    dataObj.dice = [];
+                    dataObj.dice = [0, 0, 0, 0, 0, 0];
                   }
               }
             });
@@ -109,9 +109,9 @@ exports.mqttConnect = () => {
               switch (data.tagId) {
                 case "37":
                   diceChecking[1] = true; // 체크 확인
-                  console.log(`다이스 확인: ${data.value} / ${dataObj.dice}`);
                   // 배열에 다이스 값 추가 (한번만)
-                  dataObj.dice.push(data.value);
+                  dataObj.dice[data.value - 1]++;
+                  console.log(`다이스 확인: ${data.value} / ${dataObj.dice}`);
               }
             });
           }
@@ -154,8 +154,14 @@ exports.mqttConnect = () => {
             const insertDice = await logDao.setDiceNum(dataObj.dice);
             const insertData = await deviceDao.insertCycleData(dataObj);
 
-            console.log(JSON.stringify(insertDice));
-            console.log(JSON.stringify(insertData));
+            logger.info(
+              `(mqttConnect.logDao.setDiceNum)${JSON.stringify(insertDice)}`
+            );
+            logger.info(
+              `(mqttConnect.deviceDao.insertCycleData)${JSON.stringify(
+                insertData
+              )}`
+            );
           } catch (error) {
             console.log(error);
           }

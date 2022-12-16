@@ -20,27 +20,20 @@ exports.addDevice = async (req, res, next) => {
     next(error);
   }
 };
-exports.findAllCycleData = async (req, res, next) => {
+exports.deleteDevice = async (req, res, next) => {
   try {
+    // 파라미터에 받아온 장치의 id 값을 받아옴
     const params = {
-      deviceid: req.params.id,
+      id: req.params.id,
     };
-    const data = await deviceDao.selectAllCycle(params);
-    logger.info(`(findAllCycleData.deviceDao.selectAllCycle)Data: ${data}`);
-    return res.status(200).json({ data });
-  } catch (error) {
-    logger.error(error.toString());
-    next(error);
-  }
-};
-exports.findTodayCycleData = async (req, res, next) => {
-  try {
-    const params = {
-      date: req.params.date,
-      deviceid: req.params.id,
-    };
-    const todayData = await deviceDao.selectTodayCycle(params);
-    return res.status(200).json({ data: todayData });
+    // Dao 호출
+    const data = await deviceDao.deleteDeviceById(params.id);
+    // 결과 확인
+    const response = httpRes.RES_SUCCESS;
+    logger.info(
+      `(delete.deviceDao.deleteDeviceById)data : ${JSON.stringify(data)}`
+    );
+    return res.status(response.code).json({ response, data });
   } catch (error) {
     logger.error(error.toString());
     next(error);
@@ -72,59 +65,15 @@ exports.getDeviceData = async (req, res, next) => {
   }
 };
 
-// 클라이언트 제어에 대한 로그 추가 API
-exports.controlDevice = async (req, res, next) => {
+// 디바이스 전체 조회 API
+exports.getAllDeviceData = async (req, res, next) => {
   try {
-    // 파라미터 세팅
-    const params = {
-      userid: req.decoded.id,
-      deviceid: req.body.deviceid,
-      control: req.body.control,
-      state: req.body.state,
-    };
-
-    // 파라미터 확인
-    if (
-      !params.userid ||
-      !params.deviceid ||
-      !params.control ||
-      params.state === undefined ||
-      params.state === null
-    ) {
-      const error = httpRes.RES_NOT_NULL;
-      logger.error(`(control.params)${error.message}`);
-      return res.status(error.code).json(error);
-    }
-
-    // 디바이스 확인
-    if (!(await deviceDao.selectDeviceById(params.deviceid))) {
-      const error = httpRes.RES_NO_DATA;
-      logger.error(`(control.deviceDao.selectDeviceById)${error.message}`);
-      return res.status(error.code).json(error);
-    }
-
-    // 작업 종류 확인
-    if (
-      !(
-        params.control === "START" ||
-        params.control === "STOP" ||
-        params.control === "RESET"
-      )
-    ) {
-      const error = httpRes.RES_WRONG_DATA;
-      logger.error(`(control.params.control)${error.message}`);
-      return res.status(error.code).json(error);
-    }
-
-    // 제어 로그 추가
-    const data = await deviceDao.insertDeviceLog(params);
-    delete data.dataValues.updatedAt;
-    delete data.dataValues.createdAt;
-    console.log(data);
-    // 로그 추가 결과
+    // 디바이스 전체 조회
+    const data = await deviceDao.selectDeviceAll();
+    // 결과 확인
     const response = httpRes.RES_SUCCESS;
     logger.info(
-      `(control.deivceDao.insertDeviceLog)data : ${JSON.stringify(data)}`
+      `(devices.deviceDao.selectDeviceAll)data : ${JSON.stringify(data)}`
     );
     return res.status(response.code).json({ response, data });
   } catch (error) {
