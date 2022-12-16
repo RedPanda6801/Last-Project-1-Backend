@@ -132,3 +132,19 @@ exports.controlDevice = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getAllDeviceData = async (req, res, next) => {
+  try {
+    // 디바이스 전체 조회
+    const data = await deviceDao.selectDeviceAll();
+    // 결과 확인
+    const response = httpRes.RES_SUCCESS;
+    logger.info(
+      `(devices.deviceDao.selectDeviceAll)data : ${JSON.stringify(data)}`
+    );
+    return res.status(response.code).json({ response, data });
+  } catch (error) {
+    logger.error(error.toString());
+    next(error);
+  }
+};

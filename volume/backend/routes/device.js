@@ -5,6 +5,7 @@ const {
   findAllCycleData,
   findTodayCycleData,
   getDeviceData,
+  getAllDeviceData,
   controlDevice,
 } = require("../controllers/device");
 const router = express.Router();
@@ -13,5 +14,6 @@ router.post("/insert", verifyRoot, addDevice);
 router.get("/find-cycle-all/:id", findAllCycleData);
 router.get("/find-cycle-today/:date/:id", findTodayCycleData);
 router.get("/:id", verifyToken, getDeviceData);
+router.get("/", verifyRoot, getAllDeviceData);
 router.post("/control", verifyToken, controlDevice);
 module.exports = router;

@@ -1,6 +1,7 @@
 const { Cycle, Device, Log } = require("../models/index");
 const dayUtil = require("../lib/dayUtil");
 const { Op } = require("sequelize");
+const { findAll } = require("../models/cycle");
 
 const dao = {
   async insertCycleData(data) {
@@ -82,6 +83,14 @@ const dao = {
         control: params.control,
         state: params.state,
       });
+      return result;
+    } catch (error) {
+      return new Error(error);
+    }
+  },
+  async selectDeviceAll() {
+    try {
+      const result = await Device.findAll({});
       return result;
     } catch (error) {
       return new Error(error);
