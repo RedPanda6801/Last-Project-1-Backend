@@ -5,22 +5,22 @@ module.exports = class Dice extends Sequelize.Model {
     return super.init(
       {
         one: {
-          type: Sequelize.BOOLEAN,
+          type: Sequelize.INTEGER,
         },
         two: {
-          type: Sequelize.BOOLEAN,
+          type: Sequelize.INTEGER,
         },
         three: {
-          type: Sequelize.BOOLEAN,
+          type: Sequelize.INTEGER,
         },
         four: {
-          type: Sequelize.BOOLEAN,
+          type: Sequelize.INTEGER,
         },
         five: {
-          type: Sequelize.BOOLEAN,
+          type: Sequelize.INTEGER,
         },
         six: {
-          type: Sequelize.BOOLEAN,
+          type: Sequelize.INTEGER,
         },
       },
       {

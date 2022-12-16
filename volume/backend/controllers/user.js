@@ -5,16 +5,18 @@ const httpRes = require("../lib/httpResponse");
 // 현재 사용자 단일 조회
 exports.userInfo = async (req, res) => {
   // 토큰에 있는 유저 정보 가져오기
-  const id = req.decoded.id;
+  const params = { id: req.decoded.id };
   try {
     // 단일 조회 로직 호출
-    const info = await userDao.selectInfo(id);
-    logger.info(`(user.select.result) ${JSON.stringify(info)}`);
+    const data = await userDao.selectInfo(params.id);
+
     // 결과값 return 하기
-    return res.status(200).json(info);
+    const response = httpRes.RES_SUCCESS;
+    logger.info(`(user.userDao.selectInfo) ${JSON.stringify(info)}`);
+    return res.status(response.code).json({ response, data });
   } catch (error) {
     logger.error(error.toString());
-    return res.status(500).json({ error: error.toString() });
+    next(error);
   }
 };
 

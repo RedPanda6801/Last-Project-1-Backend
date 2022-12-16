@@ -1,5 +1,5 @@
 const logger = require("../lib/logger");
-const { Cycle, Log } = require("../models");
+const { Cycle, Log, Dice } = require("../models");
 const dayUtil = require("../lib/dayUtil");
 const { Op } = require("sequelize");
 
@@ -9,6 +9,7 @@ const dao = {
     try {
       // 한 사이클에 대한 저장 값들을 정의
       const { userId, deviceId, work, good, bad, start, end } = data;
+      console.log(data);
       // DB에 추가
       const result = await Cycle.create({
         DeviceId: deviceId,
@@ -21,6 +22,7 @@ const dao = {
       });
       return result;
     } catch (error) {
+      console.log(error);
       return new Error(error);
     }
   },
@@ -77,6 +79,7 @@ const dao = {
         });
         return result;
       } catch (error) {
+        console.log(error);
         logger.error(error.toString());
         return new Error(error);
       }

@@ -1,5 +1,4 @@
 const mqtt = require("mqtt");
-const deviceDao = require("../dao/deviceDao");
 const logDao = require("../dao/logDao");
 const logger = require("./logger");
 
@@ -14,15 +13,13 @@ let dataObj = {
   deviceId: null, // 현재 작업 기기
   start: null, // 시작시간
   work: 0, // 총 작업량
-  second: 0, // 2호기 작업량
-  trd: 0, // 3호기 작업량
   good: 0, // 양품 개수
   bad: 0, // 불량품 개수
   dice: [0, 0, 0, 0, 0, 0], // 판별된 다이스 숫자
 };
 
 exports.mqttConnect = () => {
-  const client = mqtt.connect("mqtt://192.168.0.50");
+  const client = mqtt.connect("mqtt://192.168.0.63");
 
   // 메인페이지에 들어왔을때 최초 연결 시 subscirbe 해줌
   client.on("connect", function () {
@@ -48,7 +45,7 @@ exports.mqttConnect = () => {
         break;
       // 작동 시에 데이터 받아오기
       case "myEdukit":
-        console.log("Device Connected");
+        console.log(`Device Connected ${start} ${isRunning}`);
         // 받은 데이터를 json 형태로 바꾸어줌
         const dataJSON = JSON.parse(message.toString()).Wrapper;
         // 연결 시에 지속적으로 데이터 받아오기
@@ -61,6 +58,7 @@ exports.mqttConnect = () => {
             // 1호기 작동 시에 다이스 체크 false로 세팅
             case "3":
               if (data.value && diceChecking[1]) diceChecking[1] = false;
+              break;
             // 주사위 0이 아니면 다이스 체크중
             case "37":
               if (data.value != 0) {
@@ -75,9 +73,9 @@ exports.mqttConnect = () => {
         if (start) {
           // 작업 시작할 때 한번만
           if (!isRunning) {
-            console.log("device running!");
             // 작업 변수 세팅
             isRunning = true;
+            console.log("device run :", isRunning);
 
             // 작업 시작 시에 해야할 일
             dataJSON.forEach((data) => {
@@ -94,9 +92,6 @@ exports.mqttConnect = () => {
                     dataObj.good = 0;
                     dataObj.bad = 0;
                     dataObj.work = 0;
-                    dataObj.second = 0;
-                    dataObj.dice = 0;
-                    dataObj.trd = 0;
                     dataObj.dice = [0, 0, 0, 0, 0, 0];
                   }
               }
@@ -115,50 +110,50 @@ exports.mqttConnect = () => {
               }
             });
           }
-          // 멈추고 이전에 작동하고 있었으면
-        } else if (!start && isRunning) {
+        }
+        // 멈추고 이전에 작동하고 있었으면
+        else if (!start && isRunning) {
+          // 작업이 끝나면 false
+          isRunning = false;
+          console.log("device run :", isRunning);
           // 수동 조작 시에 관리자 및 1번 기기 값을 넣음
           if (!dataObj.userId) dataObj.userId = 1;
           if (!dataObj.deviceId) dataObj.deviceId = 1;
 
           // 작업 종료 시에 데이터 정제 및 저장
           dataJSON.forEach((data) => {
+            // 데이터 정제 작업
             switch (data.tagId) {
               // 사이클 작업 완료 시간
               case "0":
                 dataObj.end = data.value;
+                break;
               // 사이클 작업량 = 총 작업량 - 이전 사이클 작업량
               case "15":
+                console.log(data.value);
                 dataObj.work = parseInt(data.value) - dataObj.work;
                 break;
-              // 2호기 작업량
-              case "16":
-                dataObj.second = parseInt(data.value) - dataObj.second;
               // 사이클 양품량 = 총 작업량 - 이전 사이클 작업량
               case "17":
-                dataObj.trd = parseInt(data.value) - dataObj.trd;
+                dataObj.good = parseInt(data.value) - dataObj.good;
                 break;
             }
           });
-          // 불량품 = 3호기 작동 X + 2호기 작동 X
-          dataObj.bad = 2 * dataObj.work - dataObj.trd + dataObj.second;
-          // 양품 = 전체 작업량 - 불량품
-          dataObj.good = dataObj.work - dataObj.bad;
+          // 불량품 = 총 작업량 - 양품
+          dataObj.bad = dataObj.work - dataObj.good;
           // 사이클 당 작업 데이터 로그
           logger.info("Data per One Cycle: ", dataObj);
-          // 작업이 끝나면 false
-          isRunning = false;
-
           try {
             // 데이터 추가
             const insertDice = await logDao.setDiceNum(dataObj.dice);
-            const insertData = await deviceDao.insertCycleData(dataObj);
+            const insertData = await logDao.insertCycleData(dataObj);
 
+            (dataObj.dice = [0, 0, 0, 0, 0, 0]), // 판별된 다이스 숫자
+              logger.info(
+                `(mqttConnect.logDao.setDiceNum)${JSON.stringify(insertDice)}`
+              );
             logger.info(
-              `(mqttConnect.logDao.setDiceNum)${JSON.stringify(insertDice)}`
-            );
-            logger.info(
-              `(mqttConnect.deviceDao.insertCycleData)${JSON.stringify(
+              `(mqttConnect.logDao.insertCycleData)${JSON.stringify(
                 insertData
               )}`
             );
