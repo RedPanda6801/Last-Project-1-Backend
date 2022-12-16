@@ -1,28 +1,5 @@
-const { Cycle, Device, Log } = require("../models/index");
-const dayUtil = require("../lib/dayUtil");
-const { Op } = require("sequelize");
-const { findAll } = require("../models/cycle");
-
+const { Device } = require("../models/index");
 const dao = {
-  async insertCycleData(data) {
-    try {
-      // 한 사이클에 대한 저장 값들을 정의
-      const { userId, deviceId, work, good, bad, start, end } = data;
-      // DB에 추가
-      const result = await Cycle.create({
-        DeviceId: deviceId,
-        UserId: userId,
-        work,
-        good,
-        bad,
-        start,
-        end,
-      });
-      return result;
-    } catch (error) {
-      return new Error(error);
-    }
-  },
   async insertDevice(params) {
     try {
       // 추가할 호기 이름 = 마지막 호기 + 1
@@ -41,48 +18,19 @@ const dao = {
       return new Error(error);
     }
   },
-  async selectAllCycle(params) {
+  async deleteDeviceById(id) {
     try {
-      const result = await Cycle.findAll({
-        where: { DeviceId: params.deviceid },
-        attributes: { exclude: ["updatedAt"] },
-      });
+      // id로 삭제
+      const result = await Device.destroy({ where: { id } });
       return result;
     } catch (error) {
-      return new Error(error);
-    }
-  },
-  async selectTodayCycle(params) {
-    try {
-      const { startDate, endDate } = dayUtil.getTodayWorkTime(params.date);
-      console.log(startDate, endDate);
-      const result = await Cycle.findAll({
-        where: {
-          start: { [Op.between]: [startDate, endDate] },
-          DeviceId: params.deviceid,
-        },
-      });
-      return result;
-    } catch (error) {
+      console.log(error);
       return new Error(error);
     }
   },
   async selectDeviceById(id) {
     try {
       const result = await Device.findOne({ where: { id } });
-      return result;
-    } catch (error) {
-      return new Error(error);
-    }
-  },
-  async insertDeviceLog(params) {
-    try {
-      const result = await Log.create({
-        DeviceId: params.deviceid,
-        UserId: params.userid,
-        control: params.control,
-        state: params.state,
-      });
       return result;
     } catch (error) {
       return new Error(error);
