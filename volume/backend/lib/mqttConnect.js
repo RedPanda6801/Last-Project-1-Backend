@@ -45,7 +45,6 @@ exports.mqttConnect = () => {
         break;
       // 작동 시에 데이터 받아오기
       case "myEdukit":
-        console.log(`Device Connected ${start} ${isRunning}`);
         // 받은 데이터를 json 형태로 바꾸어줌
         const dataJSON = JSON.parse(message.toString()).Wrapper;
         // 연결 시에 지속적으로 데이터 받아오기
@@ -141,6 +140,8 @@ exports.mqttConnect = () => {
           });
           // 불량품 = 총 작업량 - 양품
           dataObj.bad = dataObj.work - dataObj.good;
+          // 음수 데이터에 대한 예외 처리
+          if (dataObj.bad < 0) dataObj.bad = 0;
           // 사이클 당 작업 데이터 로그
           logger.info("Data per One Cycle: ", dataObj);
           try {
