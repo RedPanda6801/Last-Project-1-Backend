@@ -8,9 +8,12 @@ exports.findAllCycleData = async (req, res, next) => {
     const params = {
       deviceid: req.params.id,
     };
+    // 전체 사이클 로그 조회
     const data = await logDao.selectAllCycle(params);
     logger.info(`(findAllCycleData.logDao.selectAllCycle)Data: ${data}`);
-    return res.status(200).json({ data });
+    // 결과값 도출
+    const response = httpRes.RES_SUCCESS;
+    return res.status(response.code).json({ response, data });
   } catch (error) {
     logger.error(error.toString());
     next(error);
@@ -22,8 +25,14 @@ exports.findTodayCycleData = async (req, res, next) => {
       date: req.params.date,
       deviceid: req.params.id,
     };
+    // 오늘 날짜의 사이클 조회
     const todayData = await logDao.selectTodayCycle(params);
-    return res.status(200).json({ data: todayData });
+    logger.info(
+      `(findTodayCycleData.logDao.selectTodayCycle)Data: ${todayData}`
+    );
+    // 결과값 도출
+    const response = httpRes.RES_SUCCESS;
+    return res.status(response.code).json({ response, data: todayData });
   } catch (error) {
     logger.error(error.toString());
     next(error);
