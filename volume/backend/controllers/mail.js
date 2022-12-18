@@ -2,27 +2,30 @@ const { getAuthCode, makeEmail } = require("../lib/mailUtil");
 const bcrypt = require("bcrypt");
 const logger = require("../lib/logger");
 const userDao = require("../dao/userDao");
+const httpRes = require("../lib/httpResponse");
 
-exports.emailsender = async (req, res) => {
+exports.emailsender = async (req, res, next) => {
   try {
     const params = { email: req.params.email };
     logger.info(`(emailsender.params)email: ${params.email}`);
     // 파라미터 값에 대한 확인
     if (!params) {
-      const error = new Error("(emailsender.email) No Data received");
-      logger.error(error.toString());
-      return res.status(400).json({ error: error.toString() });
+      const error = httpRes.RES_NOT_NULL;
+      logger.error(`(send-email.params)${error.message}`);
+      return res.status(error.code).json(error);
     }
-
+    // 이메일로 유저 정보 찾기
     const user = await userDao.selectByEmail(params.email);
     // 유저 메일 중복 예외 처리
     if (user) {
-      const error = new Error("(emailsender.findByEmail) No User in DB");
-      return res.status(500).json({ error: error.toString() });
+      const error = httpRes.RES_EXISTED;
+      logger.error(`(send-email.userDao.selectByEmail)${error.message}`);
+      return res.status(error.code).json(error);
     }
     // 랜덤 코드 6자리 생성
     const code = getAuthCode();
     // 메일 보내기
+
     // email과 code가 유효하면 메일을 보냄
     if (code && params.email) {
       // html에 랜덤 코드를 담아 넣음
@@ -37,8 +40,8 @@ exports.emailsender = async (req, res) => {
       const hashCode = await bcrypt.hash(code, 12);
       // 메일 전송
       const info = await emailMaker[0].sendMail(emailMaker[1]);
-      console.log("메일 정보: ", info);
-      logger.info("(emailsender.sendMail) Mail Sending Success!");
+
+      logger.info(`(emailsender.sendMail)info : ${info}`);
       return res.status(200).json({
         hash: hashCode,
         email: params.email,
@@ -46,7 +49,7 @@ exports.emailsender = async (req, res) => {
     }
   } catch (error) {
     logger.error(error.toString());
-    return res.status(500).json({ error: error.toString() });
+    next(error);
   }
 };
 // 인증코드 인증
@@ -62,25 +65,25 @@ exports.emailauth = async (req, res) => {
     );
     // 파라미터가 온전히 받아졌는지 확인
     if (!params.email || !params.code || !params.hash) {
-      const error = new Error(
-        "(emailauth.params)params is not enough received"
-      );
-      logger.error(error.toString());
-      return res.status(400).json({ error: error.toString() });
+      const error = httpRes.RES_NOT_NULL;
+      logger.error(`(emailauth.params)${error.message}`);
+      return res.status(error.code).json(error);
     }
     // 복호화 해줌
     const result = await bcrypt.compare(params.code, params.hash);
-    console.log(result);
     if (!result) {
-      const error = new Error("Input Code is not Corrected");
-      logger.error(error.toString);
-      return res.status(500).json({ error: error.toString() });
+      const error = httpRes.RES_WRONG_DATA;
+      logger.error(`(emailauth.bcrypt.compare)${error.message}`);
+      return res.status(error.code).json(error);
     } else {
-      logger.info("(emailauth.bcrypt.compare)Code is Corrected");
-      return res.status(200).json({ email: params.email });
+      const response = httpRes.RES_SUCCESS;
+      logger.info(
+        `(emailauth.bcrypt.compare)${response.message} ${params.email}`
+      );
+      return res.status(response.code).json({ response, email: params.email });
     }
   } catch (error) {
     logger.error(error.toString());
-    return res.status(500).json({ error: error.toString() });
+    next(error);
   }
 };
