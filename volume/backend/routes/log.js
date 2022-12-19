@@ -8,7 +8,7 @@ const {
 const router = express.Router();
 
 router.get("/find-cycle-all/:id", findAllCycleData);
-router.get("/find-cycle-today/:date/:id", findTodayCycleData);
+router.get("/find-cycle-today/:id", findTodayCycleData);
 router.post("/control", verifyToken, controlDevice);
 
 module.exports = router;

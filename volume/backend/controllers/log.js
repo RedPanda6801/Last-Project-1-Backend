@@ -22,17 +22,14 @@ exports.findAllCycleData = async (req, res, next) => {
 exports.findTodayCycleData = async (req, res, next) => {
   try {
     const params = {
-      date: req.params.date,
       deviceid: req.params.id,
     };
     // 오늘 날짜의 사이클 조회
-    const todayData = await logDao.selectTodayCycle(params);
-    logger.info(
-      `(findTodayCycleData.logDao.selectTodayCycle)Data: ${todayData}`
-    );
+    const data = await logDao.selectTodayCycle(params);
+    logger.info(`(findTodayCycleData.logDao.selectTodayCycle)Data: ${data}`);
     // 결과값 도출
     const response = httpRes.RES_SUCCESS;
-    return res.status(response.code).json({ response, data: todayData });
+    return res.status(response.code).json({ response, data });
   } catch (error) {
     logger.error(error.toString());
     next(error);
