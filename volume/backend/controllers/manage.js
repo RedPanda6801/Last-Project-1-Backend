@@ -18,9 +18,9 @@ exports.giveAuthToClient = async (req, res, next) => {
       return res.stauts(error.code).json(error);
     }
 
-    // 조인 ORM 추가
+    // N:M관계의 DAO 호출
     const datas = await manageDao.addAuth(params);
-    const data = datas[0];
+    const data = data ? datas[0] : "existed";
     // 결과값 확인
     const response = httpRes.RES_SUCCESS;
     logger.info(`(give-auth.manageDao.addAuth)data: ${JSON.stringify(data)}`);

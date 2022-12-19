@@ -93,6 +93,7 @@ exports.mqttConnect = () => {
                     dataObj.work = 0;
                     dataObj.dice = [0, 0, 0, 0, 0, 0];
                   }
+                  break;
               }
             });
           }
@@ -106,6 +107,7 @@ exports.mqttConnect = () => {
                   // 배열에 다이스 값 추가 (한번만)
                   dataObj.dice[data.value - 1]++;
                   console.log(`다이스 확인: ${data.value} / ${dataObj.dice}`);
+                  break;
               }
             });
           }
