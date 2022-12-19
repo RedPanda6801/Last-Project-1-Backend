@@ -1,3 +1,4 @@
+const manageDao = require("../dao/manageDao");
 const deviceDao = require("../dao/deviceDao");
 const logger = require("../lib/logger");
 const httpRes = require("../lib/httpResponse");
@@ -10,11 +11,17 @@ exports.addDevice = async (req, res, next) => {
       userid: req.decoded.id,
     };
     // 데이터 추가 dao 호출
-    const data = await deviceDao.insertDevice(params);
+    const device = await deviceDao.insertDevice(params);
+    logger.info(
+      `(insert.deviceDao.insertDevice)device : ${JSON.stringify(device)}`
+    );
+    params.deviceid = device.dataValues.id;
+    // 관리자에게 모든 장치를 다루는 권한 부여
+    const auth = await manageDao.addAuth(params);
+    logger.info(`(insert.manageDao.addAuth)data : ${JSON.stringify(auth)}`);
     // 성공시 결과값 리턴
     const response = httpRes.RES_SUCCESS;
-    logger.info(`(insert.deviceDao.insertDevice)data : ${data}`);
-    return res.status(response.code).json({ response, data });
+    return res.status(response.code).json({ response, data: { device, auth } });
   } catch (error) {
     logger.error(error.toString());
     next(error);

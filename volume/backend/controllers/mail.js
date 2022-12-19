@@ -41,7 +41,7 @@ exports.emailsender = async (req, res, next) => {
       // 메일 전송
       const info = await emailMaker[0].sendMail(emailMaker[1]);
 
-      logger.info(`(emailsender.sendMail)info : ${info}`);
+      logger.info(`(emailsender.sendMail)info : ${JSON.stringify(info)}`);
       return res.status(200).json({
         hash: hashCode,
         email: params.email,
