@@ -9,10 +9,6 @@ module.exports = class Device extends Sequelize.Model {
           type: Sequelize.STRING(100),
           allowNull: false,
         },
-        // emergency of device
-        state: {
-          type: Sequelize.BOOLEAN,
-        },
       },
       {
         sequelize,

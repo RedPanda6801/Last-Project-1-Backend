@@ -3,7 +3,7 @@ const userDao = require("../dao/userDao");
 const httpRes = require("../lib/httpResponse");
 
 // 현재 사용자 단일 조회
-exports.userInfo = async (req, res) => {
+exports.userInfo = async (req, res, next) => {
   // 토큰에 있는 유저 정보 가져오기
   const params = { id: req.decoded.id };
   try {
@@ -12,7 +12,7 @@ exports.userInfo = async (req, res) => {
     logger.info(`(users.params)data: ${JSON.stringify(data)}`);
     // 결과값 return 하기
     const response = httpRes.RES_SUCCESS;
-    logger.info(`(user.userDao.selectInfo) ${JSON.stringify(info)}`);
+    logger.info(`(user.userDao.selectInfo) ${JSON.stringify(data)}`);
     return res.status(response.code).json({ response, data });
   } catch (error) {
     logger.error(error.toString());
@@ -21,7 +21,7 @@ exports.userInfo = async (req, res) => {
 };
 
 // 사용자 정보 수정
-exports.userUpdate = async (req, res) => {
+exports.userUpdate = async (req, res, next) => {
   try {
     const params = {
       id: req.decoded.id,
@@ -64,7 +64,7 @@ exports.userUpdate = async (req, res) => {
 };
 
 // 사용자 정보 삭제
-exports.userDelete = async (req, res) => {
+exports.userDelete = async (req, res, next) => {
   try {
     // 토큰 정보로 유저 정보와 비교
     const params = {
