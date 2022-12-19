@@ -39,7 +39,7 @@ const dao = {
   },
   async selectTodayCycle(params) {
     try {
-      const { startDate, endDate } = dayUtil.getTodayWorkTime(params.date);
+      const { startDate, endDate } = dayUtil.getTodayWorkTime();
       console.log(startDate, endDate);
       const result = await Cycle.findAll({
         where: {
